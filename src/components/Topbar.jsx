@@ -1,19 +1,20 @@
-import { motion } from "framer-motion";
-
 export default function Topbar() {
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="h-16 flex items-center justify-between px-6 border-b border-white/10"
-    >
-      <div className="text-sm text-white/70">
-        Image Generation Workflow
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-white">
+          Hello Rahul 👋
+        </h2>
+        <p className="text-white/60 text-sm">
+          Welcome back to PhotoFolio
+        </p>
       </div>
 
-      <button className="px-4 py-2 rounded-lg bg-white text-black text-sm font-medium">
-        New Project
-      </button>
-    </motion.header>
+      <div className="flex items-center gap-4">
+        <button className="text-white/70">🔍</button>
+        <button className="text-white/70">🔔</button>
+        <div className="w-10 h-10 rounded-full bg-white/30" />
+      </div>
+    </div>
   );
 }

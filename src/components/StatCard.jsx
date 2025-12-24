@@ -1,13 +1,9 @@
-import { motion } from "framer-motion";
-
-export default function StatCard({ title, value }) {
+export function StatCard({ title, value }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.03 }}
-      className="bg-[#111118] border border-white/10 rounded-xl p-6"
-    >
-      <p className="text-white/60 text-sm">{title}</p>
-      <h2 className="text-3xl font-bold mt-2">{value}</h2>
-    </motion.div>
+    <div className="bg-white/10 backdrop-blur-lg border border-white/20
+      rounded-xl p-4 text-white shadow">
+      <p className="text-sm text-white/60">{title}</p>
+      <h3 className="text-2xl font-bold">{value}</h3>
+    </div>
   );
 }

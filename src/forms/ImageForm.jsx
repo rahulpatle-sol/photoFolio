@@ -1,49 +1,66 @@
 import { useState } from "react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "../firebase/config";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { addDoc, collection } from "firebase/firestore";
 
-export default function ImageForm({ album }) {
-  const [file, setFile] = useState(null);
+export default function ImageForm({ albumId }) {
   const [title, setTitle] = useState("");
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const uploadImage = async (e) => {
-    e.preventDefault();
-    if (!file) return;
+  const handleUpload = async () => {
+    if (!file || !title) return alert("Missing data");
 
-    const imgRef = ref(storage, `images/${album.id}/${file.name}`);
-    await uploadBytes(imgRef, file);
+    try {
+      setLoading(true);
 
-    const url = await getDownloadURL(imgRef);
+      const imageRef = ref(
+        storage,
+        `albums/${albumId}/${Date.now()}-${file.name}`
+      );
 
-    await addDoc(collection(db, "images"), {
-      albumId: album.id,
-      title,
-      imageUrl: url,
-      createdAt: serverTimestamp(),
-    });
+      await uploadBytes(imageRef, file);
+      const url = await getDownloadURL(imageRef);
 
-    setFile(null);
-    setTitle("");
+      await addDoc(collection(db, "albums", albumId, "images"), {
+        title,
+        url,
+        createdAt: new Date(),
+      });
+
+      setTitle("");
+      setFile(null);
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={uploadImage} className="mb-4">
+    <div className="p-4 bg-white rounded-xl shadow mb-6">
       <input
         type="text"
         placeholder="Image title"
+        className="w-full mb-3 p-2 border rounded"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="border px-3 py-2 w-full mb-2"
       />
+
       <input
         type="file"
+        accept="image/*"
         onChange={(e) => setFile(e.target.files[0])}
-        className="mb-2"
       />
-      <button className="bg-black text-white px-4 py-2 rounded">
-        Upload Image
+
+      <button
+        onClick={handleUpload}
+        disabled={loading}
+        className="mt-3 px-4 py-2 bg-black text-white rounded"
+      >
+        {loading ? "Uploading..." : "Upload Image"}
       </button>
-    </form>
+    </div>
   );
 }
