@@ -1,9 +1,17 @@
-import React from 'react'
+import { useState } from "react";
+import AlbumsList from "../components/AlbumList";
+import ImagesList from  "../components/ImageList"
 
-const Dashboard = () => {
+export default function Dashboard() {
+  const [album, setAlbum] = useState(null);
+
   return (
-    <div>Dashboard</div>
-  )
+    <div className="p-6">
+      {!album ? (
+        <AlbumsList setSelectedAlbum={setAlbum} />
+      ) : (
+        <ImagesList album={album} goBack={() => setAlbum(null)} />
+      )}
+    </div>
+  );
 }
-
-export default Dashboard

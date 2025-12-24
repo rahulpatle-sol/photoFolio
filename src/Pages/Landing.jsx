@@ -1,9 +1,13 @@
-import React from 'react'
+import Navbar from "../components/Navbar";
+import HowItWorksDraggable from "../ui/Features";
+import Hero from "../ui/Hero";
 
-const Landing = () => {
+export default function Landing() {
   return (
-    <div>Landing</div>
-  )
+    <main className="min-h-screen bg-gradient-to-br from-[#f7fafa] to-[#eef6f9]">
+      <Navbar />
+      <Hero />
+      <HowItWorksDraggable/>
+    </main>
+  );
 }
-
-export default Landing
