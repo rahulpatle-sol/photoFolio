@@ -43,7 +43,7 @@ export default function Navbar() {
 
           {/* --- DESKTOP NAVIGATION (Magnetic Feel) --- */}
           <div className="hidden lg:flex gap-14 items-center">
-            {['About', 'Vault', 'Pricing', 'Services'].map((link) => (
+            {['About', 'Pricing', 'Services'].map((link) => (
               <a 
                 key={link} 
                 href={`/${link.toLowerCase()}`} 
@@ -107,7 +107,7 @@ export default function Navbar() {
             {/* Right Side: Links */}
             <div className="flex-1 flex flex-col justify-center px-10 md:px-24 bg-[#F9F7F2]">
               <div className="space-y-4">
-                {['Home', 'The Archive', 'Investment', 'Membership', 'Concierge'].map((item, i) => (
+                {['Pricing', 'Contact', 'About'].map((item, i) => (
                   <motion.div
                     key={item}
                     initial={{ opacity: 0, x: 50 }}
