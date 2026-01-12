@@ -1,9 +1,10 @@
+"use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { auth } from "../firebase/config";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { toast } from "react-toastify";
-import { UserPlus, Mail, Lock, ArrowLeft } from "lucide-react";
+import { UserPlus, Mail, Lock, ShieldCheck, Crown } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 const Register = () => {
@@ -17,48 +18,100 @@ const Register = () => {
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      toast.success("Account created! Welcome to the family. 📸");
+      toast.success("Membership Approved. Welcome to the Vault.");
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error.message);
+      toast.error("Registration failed. Security protocol denied.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-[#050505] px-4 overflow-hidden">
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]" />
+    <div className="min-h-screen relative flex items-center justify-center bg-[#F9F7F2] px-4 overflow-hidden">
+      
+      {/* Dynamic Luxury Background */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#A68A56]/5 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-black/[0.02] blur-[150px] rounded-full pointer-events-none" />
 
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 w-full max-w-[420px] bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex p-3 bg-purple-500/20 rounded-2xl mb-4">
-            <UserPlus className="w-8 h-8 text-purple-400" />
-          </div>
-          <h2 className="text-3xl font-bold text-white">Join Us</h2>
-          <p className="text-gray-400 mt-2">Create your photographer profile</p>
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="relative z-10 w-full max-w-[460px] bg-white rounded-[3.5rem] border border-black/[0.03] p-10 md:p-14 shadow-[0_50px_100px_rgba(0,0,0,0.04)]"
+      >
+        <div className="text-center mb-12">
+          <motion.div 
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="inline-flex p-4 bg-[#1A1A1A] text-[#A68A56] rounded-[2rem] mb-8 shadow-xl"
+          >
+            <Crown size={32} />
+          </motion.div>
+          <h2 className="text-4xl font-black uppercase tracking-tighter text-[#1A1A1A] italic">
+            Begin <span className="font-serif not-italic text-[#A68A56]">Legacy.</span>
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 mt-4 leading-loose">
+            Requesting access to Private Archive 2026
+          </p>
         </div>
 
-        <form onSubmit={handleRegister} className="space-y-5">
-          <div className="relative">
-            <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-500" />
-            <input type="email" required placeholder="Email Address" className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-purple-500 outline-none transition-all" onChange={(e) => setEmail(e.target.value)} />
+        <form onSubmit={handleRegister} className="space-y-6">
+          {/* Email Input */}
+          <div className="relative group">
+            <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-300 group-focus-within:text-[#A68A56] transition-colors" />
+            <input 
+              type="email" 
+              required 
+              placeholder="PRIMARY EMAIL ADDRESS" 
+              className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-black/[0.02] rounded-2xl text-sm font-bold tracking-widest outline-none focus:border-[#A68A56]/40 transition-all placeholder:text-gray-300 placeholder:font-black" 
+              onChange={(e) => setEmail(e.target.value)} 
+            />
           </div>
 
-          <div className="relative">
-            <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-500" />
-            <input type="password" required placeholder="Create Password" className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-purple-500 outline-none transition-all" onChange={(e) => setPassword(e.target.value)} />
+          {/* Password Input */}
+          <div className="relative group">
+            <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-300 group-focus-within:text-[#A68A56] transition-colors" />
+            <input 
+              type="password" 
+              required 
+              placeholder="SECURE VAULT KEY" 
+              className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-black/[0.02] rounded-2xl text-sm font-bold tracking-widest outline-none focus:border-[#A68A56]/40 transition-all placeholder:text-gray-300 placeholder:font-black" 
+              onChange={(e) => setPassword(e.target.value)} 
+            />
           </div>
 
-          <button disabled={loading} className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-purple-600/20">
-            {loading ? "Creating Account..." : "Register Now"}
-          </button>
+          {/* Security Note */}
+          <div className="flex items-center gap-3 px-2 py-1 opacity-40">
+            <ShieldCheck size={14} className="text-[#A68A56]" />
+            <p className="text-[8px] font-black uppercase tracking-widest">Quantum-Ready Encryption Enabled</p>
+          </div>
+
+          {/* Action Button */}
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={loading} 
+            className="w-full py-5 bg-[#1A1A1A] text-[#A68A56] font-black uppercase tracking-[0.4em] rounded-2xl transition-all disabled:opacity-50 text-[10px] shadow-2xl flex items-center justify-center gap-3 mt-4"
+          >
+            {loading ? "Processing..." : "Initiate Membership"}
+          </motion.button>
         </form>
 
-        <p className="text-center text-gray-400 mt-6">
-          Already a member? <Link to="/login" className="text-purple-400 font-medium">Sign In</Link>
-        </p>
+        {/* Bottom Navigation */}
+        <div className="mt-12 pt-8 border-t border-black/5 text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Already possess a key? 
+              <Link to="/login" className="text-[#1A1A1A] ml-2 border-b border-black/20 pb-1 hover:text-[#A68A56] hover:border-[#A68A56] transition-all">
+                Authenticate
+              </Link>
+            </p>
+        </div>
       </motion.div>
+
+      {/* Side Decorative Text */}
+      <div className="absolute right-[-50px] top-1/2 -rotate-90 hidden xl:block opacity-10 pointer-events-none">
+          <p className="text-[10px] font-black uppercase tracking-[2em]">ESTABLISHED • TWENTY • TWENTY • SIX</p>
+      </div>
     </div>
   );
 };

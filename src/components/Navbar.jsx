@@ -1,146 +1,150 @@
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../firebase/config";
-import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowRight, LayoutDashboard, LogOut, Camera } from "lucide-react";
+"use client";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, ArrowUpRight, Camera } from 'lucide-react';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  // Scroll effect to change navbar background
+  // Scroll detection for "Shrinking" effect
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsub();
-  }, []);
-
-  // Smooth Scroll Function
-  const scrollToSection = (id) => {
-    setIsOpen(false);
-    if (location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    setIsOpen(false);
-    navigate("/");
-  };
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
+  }, [isOpen]);
 
   return (
-    <nav 
-      className={`fixed top-0 w-full z-[100] transition-all duration-500 px-6 md:px-12 py-4 ${
-        scrolled ? "bg-white/80 backdrop-blur-xl border-b border-black/5 py-3 shadow-sm" : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        
-        {/* LOGO */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 cursor-pointer group"
-        >
-          <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:rotate-6 transition-transform">
-            <Camera className="text-white w-5 h-5" />
-          </div>
-          <div className="text-xl font-black tracking-tighter">
-            <span className="text-gray-900">Photo</span>
-            <span className="text-indigo-600 italic font-serif">Folio</span>
-          </div>
-        </motion.div>
-
-        {/* DESKTOP NAV LINKS */}
-        <div className="hidden md:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">
-          <button onClick={() => scrollToSection('home')} className="hover:text-indigo-600 transition-colors">Home</button>
-          <button onClick={() => scrollToSection('about')} className="hover:text-indigo-600 transition-colors">About</button>
-          <button onClick={() => scrollToSection('pricing')} className="hover:text-indigo-600 transition-colors">Pricing</button>
-          <button className="hover:text-indigo-600 transition-colors">Blog</button>
-        </div>
-
-        {/* ACTIONS */}
-        <div className="flex items-center gap-4">
-          {user ? (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold bg-gray-900 text-white hover:bg-indigo-600 transition-all active:scale-95 shadow-xl shadow-gray-200"
-              >
-                <LayoutDashboard size={14} /> DASHBOARD
-              </button>
-              
-              <button
-                onClick={handleLogout}
-                className="p-2.5 rounded-full border border-black/5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => navigate("/login")}
-              className="px-7 py-3 rounded-2xl text-xs font-black bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center gap-2"
-            >
-              LOGIN <ArrowRight size={14} />
-            </button>
-          )}
-
-          {/* MOBILE TOGGLE */}
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-gray-900"
+    <>
+      <nav className={`fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-700 ${scrolled ? 'top-4 w-[95%]' : 'top-8 w-[92%]'}`}>
+        <div className="relative group bg-white/30 backdrop-blur-3xl border border-black/[0.03] px-6 md:px-12 py-5 rounded-[3rem] flex justify-between items-center shadow-[0_20px_80px_rgba(0,0,0,0.03)] overflow-hidden">
+          
+          {/* --- AMIRI LOGO SECTION --- */}
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-4 cursor-pointer relative z-10"
           >
-            {isOpen ? <X size={26} /> : <Menu size={26} />}
-          </button>
-        </div>
-      </div>
+            {/* The Logo Crest */}
+            <div className="relative w-10 h-10 bg-[#1A1A1A] rounded-xl flex items-center justify-center overflow-hidden rotate-3 group-hover:rotate-0 transition-transform duration-500">
+               <span className="text-[#A68A56] font-black text-xl italic tracking-tighter">PF</span>
+               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent" />
+            </div>
+            {/* Brand Name */}
+            <div className="flex flex-col">
+                <span className="text-sm font-black uppercase tracking-[0.3em] leading-none text-[#1A1A1A]">PHOTOFOLIO</span>
+                <span className="text-[8px] font-bold uppercase tracking-[0.5em] text-[#A68A56] mt-1">Archive System</span>
+            </div>
+          </motion.div>
 
-      {/* MOBILE MENU */}
+          {/* --- DESKTOP NAVIGATION (Magnetic Feel) --- */}
+          <div className="hidden lg:flex gap-14 items-center">
+            {['About', 'Vault', 'Pricing', 'Services'].map((link) => (
+              <a 
+                key={link} 
+                href={`/${link.toLowerCase()}`} 
+                className="relative text-[10px] font-black tracking-[0.4em] uppercase text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors group"
+              >
+                {link}
+                <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-[#A68A56] transition-all duration-500 group-hover:w-full" />
+              </a>
+            ))}
+          </div>
+
+          {/* --- ACTION AREA --- */}
+          <div className="flex items-center gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              className="hidden sm:flex items-center gap-3 px-8 py-3.5 bg-[#1A1A1A] text-[#A68A56] rounded-full text-[9px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-black transition-all"
+            >
+              Access Vault <ArrowUpRight size={14} />
+            </motion.button>
+            
+            {/* Menu Toggle Button */}
+            <button 
+              onClick={() => setIsOpen(!isOpen)}
+              className="relative w-12 h-12 bg-white border border-black/5 rounded-full flex items-center justify-center hover:bg-gray-50 transition-all shadow-lg overflow-hidden group"
+            >
+              <div className={`absolute inset-0 bg-[#A68A56] transition-transform duration-500 ${isOpen ? 'translate-y-0' : 'translate-y-full'}`} />
+              <div className="relative z-10">
+                {isOpen ? <X size={20} className="text-black" /> : <Menu size={20} className="text-black group-hover:rotate-90 transition-transform duration-500" />}
+              </div>
+            </button>
+          </div>
+
+          {/* Subtle Shine Reflection */}
+          <div className="absolute -left-full top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-25deg] group-hover:left-[150%] transition-all duration-1000 ease-in-out" />
+        </div>
+      </nav>
+
+      {/* --- LUXURY FULLSCREEN MENU --- */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 w-full bg-white border-b border-black/5 shadow-2xl md:hidden overflow-hidden"
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] bg-[#F9F7F2] flex flex-col md:flex-row"
           >
-            <div className="flex flex-col p-8 gap-6 font-black text-xs tracking-widest text-gray-400">
-              <button onClick={() => scrollToSection('home')} className="text-left py-2 hover:text-indigo-600 uppercase">Home</button>
-              <button onClick={() => scrollToSection('about')} className="text-left py-2 hover:text-indigo-600 uppercase">About</button>
-              <button onClick={() => scrollToSection('pricing')} className="text-left py-2 hover:text-indigo-600 uppercase">Pricing</button>
-              <hr className="border-black/5" />
-              {user ? (
-                <button onClick={() => navigate("/dashboard")} className="text-indigo-600 flex items-center gap-2">
-                  <LayoutDashboard size={16} /> GO TO DASHBOARD
-                </button>
-              ) : (
-                <button onClick={() => navigate("/login")} className="w-full bg-indigo-600 text-white py-4 rounded-2xl shadow-lg shadow-indigo-100">
-                  GET STARTED NOW
-                </button>
-              )}
+            {/* Left Side: Visual/Video Content (Very Expensive Look) */}
+            <div className="hidden md:block w-1/3 bg-[#1A1A1A] relative overflow-hidden">
+                <img 
+                    src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1000" 
+                    className="w-full h-full object-cover opacity-30 grayscale hover:scale-110 transition-transform duration-[2s]"
+                    alt="Menu Art"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent" />
+                <div className="absolute bottom-20 left-10">
+                    <p className="text-[#A68A56] text-[10px] font-black uppercase tracking-[1em] mb-4">Current Edition</p>
+                    <h3 className="text-white text-4xl font-serif italic uppercase tracking-tighter">Twenty Twenty Six</h3>
+                </div>
+            </div>
+
+            {/* Right Side: Links */}
+            <div className="flex-1 flex flex-col justify-center px-10 md:px-24 bg-[#F9F7F2]">
+              <div className="space-y-4">
+                {['Home', 'The Archive', 'Investment', 'Membership', 'Concierge'].map((item, i) => (
+                  <motion.div
+                    key={item}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + i * 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <a
+                      href={`/${item.toLowerCase().replace(' ', '-')}`}
+                      className="group flex items-end gap-6 text-3xl md:text-[8vw] font-lite uppercase tracking-tighter text-[#1A1A1A] hover:italic hover:text-[#A68A56] transition-all leading-none"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="text-xs font-serif italic text-gray-300 group-hover:text-[#A68A56] pb-2">0{i+1}</span>
+                      {item}
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Menu Socials & Contacts */}
+              <div className="mt-20 pt-10 border-t border-black/5 flex flex-col md:flex-row gap-10 md:gap-32">
+                <div className="space-y-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Social Presence</p>
+                    <div className="flex gap-6 text-[10px] font-bold uppercase tracking-widest">
+                        <a href="#" className="hover:text-[#A68A56]">Instagram</a>
+                        <a href="#" className="hover:text-[#A68A56]">Behance</a>
+                        <a href="#" className="hover:text-[#A68A56]">Twitter</a>
+                    </div>
+                </div>
+                <div className="space-y-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Inquiries</p>
+                    <p className="text-sm font-black italic tracking-tighter">concierge@photofolio.private</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 }

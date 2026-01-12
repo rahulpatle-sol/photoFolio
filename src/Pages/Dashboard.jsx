@@ -1,8 +1,9 @@
+"use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   ImageIcon, Upload, Plus, LogOut, Search, 
-  Grid, X, Trash2, Folder, Link as LinkIcon, Menu, Maximize2 
+  Grid, X, Trash2, Folder, Link as LinkIcon, Menu, Eye 
 } from "lucide-react";
 import Masonry from "react-masonry-css";
 import { auth, db, storage } from "../firebase/config";
@@ -22,7 +23,6 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [uploadTab, setUploadTab] = useState("file");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [webLink, setWebLink] = useState("");
   const [webLinkName, setWebLinkName] = useState("");
@@ -34,19 +34,46 @@ const Dashboard = () => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
-        const qPhotos = query(collection(db, "photos"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+        // Important: Make sure to create the index in Firebase Console!
+        const qPhotos = query(
+          collection(db, "photos"), 
+          where("userId", "==", user.uid), 
+          orderBy("createdAt", "desc")
+        );
         const unsubPhotos = onSnapshot(qPhotos, (snap) => setPhotos(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+        
         const qAlbums = query(collection(db, "albums"), where("userId", "==", user.uid));
         const unsubAlbums = onSnapshot(qAlbums, (snap) => setUserAlbums(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+        
         return () => { unsubPhotos(); unsubAlbums(); };
       } else { navigate("/login"); }
     });
     return () => unsubscribeAuth();
   }, [navigate]);
 
-  const copyToClipboard = (text, msg) => {
-    navigator.clipboard.writeText(text);
-    toast.success(msg);
+  // --- 1. FIXED: Handle Web Link Upload ---
+  const handleLinkUpload = async (e) => {
+    e.preventDefault();
+    if (!webLink) return;
+    setUploading(true);
+    try {
+      await addDoc(collection(db, "photos"), {
+        url: webLink,
+        name: webLinkName || "Web Fragment",
+        userId: currentUser.uid,
+        albumId: selectedAlbum || "",
+        createdAt: serverTimestamp()
+      });
+      toast.success("Web Fragment Preserved!");
+      setShowModal(false);
+      setWebLink("");
+      setWebLinkName("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error Saving Link!");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleBulkUpload = async (e) => {
@@ -65,109 +92,111 @@ const Dashboard = () => {
         completed++;
         setProgress(Math.round((completed / files.length) * 100));
       }));
-      toast.success("Folder Uploaded!");
+      toast.success("Legacies Preserved!");
       setShowModal(false);
-    } catch (err) { toast.error("Upload Error!"); }
+    } catch (err) { toast.error("Transmission Interrupted!"); }
     finally { setUploading(false); setProgress(0); }
-  };
-
-  const handleLinkUpload = async (e) => {
-    e.preventDefault();
-    setUploading(true);
-    try {
-      await addDoc(collection(db, "photos"), {
-        url: webLink, name: webLinkName || "Web Image", userId: currentUser.uid, albumId: selectedAlbum, createdAt: serverTimestamp()
-      });
-      toast.success("Saved!");
-      setShowModal(false); setWebLink(""); setWebLinkName("");
-    } catch (err) { toast.error("Error!"); }
-    finally { setUploading(false); }
   };
 
   const filteredPhotos = useMemo(() => photos.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())), [photos, searchQuery]);
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row ${darkMode ? 'bg-[#050505] text-white' : 'bg-[#f8f9fa] text-gray-900'}`}>
-      <aside className={`fixed md:relative z-[60] w-72 h-screen border-r p-6 flex flex-col ${darkMode ? 'bg-[#0a0a0a] border-white/5' : 'bg-white border-gray-200'} ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300`}>
-        <div className="flex items-center gap-3 mb-10">
-          <div className="p-2 bg-indigo-600 rounded-xl text-white"><ImageIcon size={24} /></div>
-          <h1 className="text-xl font-black italic tracking-tighter uppercase">PhotoFolio</h1>
+    <div className="min-h-screen flex bg-[#0A0A0A] text-[#E9E4D9]">
+      
+      {/* Sidebar (Same as before) */}
+      <aside className={`fixed md:relative z-[60] w-80 h-screen border-r border-white/5 p-8 flex flex-col bg-[#050505] ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-500`}>
+        <div className="flex items-center gap-3 mb-16">
+          <div className="w-10 h-10 bg-[#A68A56] rounded-full flex items-center justify-center text-black font-black italic">PF</div>
+          <h1 className="text-xl font-black tracking-tighter uppercase italic">Vault</h1>
         </div>
-        <button onClick={() => setShowModal(true)} className="w-full py-4 bg-indigo-600 text-white rounded-2xl flex items-center justify-center gap-2 font-black text-xs mb-8 shadow-xl shadow-indigo-600/20"><Plus size={20} /> ADD MEMORY</button>
-        <nav className="flex-1 space-y-2">
-          <button onClick={() => navigate("/dashboard")} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold bg-white/5 text-indigo-400"><Grid size={18}/> Library</button>
-          <button onClick={() => navigate("/albums")} className="w-full flex items-center gap-4 px-5 py-4 text-gray-500 hover:text-indigo-600 rounded-2xl text-sm font-bold"><Folder size={18}/> Albums</button>
+
+        <button 
+          onClick={() => setShowModal(true)} 
+          className="w-full py-5 bg-[#A68A56] text-black rounded-full flex items-center justify-center gap-3 font-black text-[10px] tracking-[0.2em] mb-12"
+        >
+          <Plus size={16} strokeWidth={3} /> NEW DEPOSIT
+        </button>
+
+        <nav className="flex-1 space-y-4">
+          <button onClick={() => navigate("/dashboard")} className="w-full flex items-center gap-4 px-6 py-4 rounded-full text-[10px] font-black tracking-widest bg-white/5 text-[#A68A56]">
+            <Grid size={18}/> THE ARCHIVE
+          </button>
+          <button onClick={() => navigate("/albums")} className="w-full flex items-center gap-4 px-6 py-4 text-white/40 rounded-full text-[10px] font-black tracking-widest">
+            <Folder size={18}/> PRIVATE ALBUMS
+          </button>
         </nav>
-        <div className="mt-auto space-y-4 pt-4 border-t border-white/5">
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5">
-            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.email}`} className="w-10 h-10 rounded-full border border-indigo-500/20" alt="pfp" />
-            <p className="text-sm font-bold truncate">{currentUser?.email?.split('@')[0]}</p>
-          </div>
-          <button onClick={() => signOut(auth)} className="w-full p-3 bg-red-500/10 text-red-500 rounded-xl font-bold text-xs">Logout</button>
+
+        <div className="mt-auto pt-8 border-t border-white/5">
+          <button onClick={() => signOut(auth)} className="w-full p-4 bg-white/5 text-red-500 rounded-full font-black text-[9px] tracking-widest">TERMINATE SESSION</button>
         </div>
       </aside>
 
-      <main className="flex-1 h-screen overflow-y-auto w-full">
-        <header className="sticky top-0 z-40 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center gap-4 bg-[#050505]/60">
-          <button className="md:hidden" onClick={() => setIsSidebarOpen(!isSidebarOpen)}><Menu/></button>
-          <div className="relative max-w-md w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input type="text" placeholder="Search by name..." onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-11 pr-4 py-2.5 rounded-xl text-sm outline-none bg-white/5 border border-white/5 focus:border-indigo-500" />
+      <main className="flex-1 h-screen overflow-y-auto">
+        <header className="sticky top-0 z-40 backdrop-blur-3xl px-10 py-6 bg-[#0A0A0A]/80 border-b border-white/5">
+          <div className="relative max-w-xl">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+            <input type="text" placeholder="Locate legacy files..." onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-16 pr-6 py-4 rounded-full text-[10px] font-bold outline-none bg-white/5 border border-white/5 uppercase" />
           </div>
         </header>
 
-        <div className="p-6">
-          <Masonry breakpointCols={{ default: 4, 1100: 3, 700: 2, 500: 1 }} className="flex w-auto gap-6">
-            {filteredPhotos.map((photo) => (
-              <motion.div layout key={photo.id} className="rounded-[2rem] overflow-hidden mb-6 border border-white/5 group relative bg-black/5" onClick={() => setPreviewImage(photo.url)}>
-                <img src={photo.url} className="w-full h-auto cursor-zoom-in" loading="lazy" />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5">
-                  <div className="w-full">
-                    <p className="text-[10px] font-black text-white mb-3 uppercase truncate">{photo.name}</p>
-                    <div className="flex gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); copyToClipboard(photo.url, "Link Copied! 🖼️"); }} className="flex-1 py-2 bg-indigo-600 text-white rounded-lg text-[10px] font-black flex items-center justify-center gap-2"><LinkIcon size={12}/> SHARE</button>
-                      <button onClick={(e) => { e.stopPropagation(); deleteDoc(doc(db, "photos", photo.id)); }} className="p-2 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-lg"><Trash2 size={14}/></button>
-                    </div>
-                  </div>
+        <div className="p-10">
+          <Masonry breakpointCols={{ default: 4, 1100: 3, 700: 2, 500: 1 }} className="flex w-auto gap-10">
+            {filteredPhotos.map((photo, i) => (
+              <motion.div key={photo.id} className="group relative rounded-[2.5rem] overflow-hidden bg-[#111] border border-white/5 mb-10">
+                <img src={photo.url} className="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-700" loading="lazy" />
+                <div className="p-6 flex justify-between items-center">
+                  <p className="text-[9px] font-black uppercase opacity-40 truncate">{photo.name}</p>
+                  <button onClick={() => deleteDoc(doc(db, "photos", photo.id))} className="text-red-500/50 hover:text-red-500"><Trash2 size={14}/></button>
                 </div>
               </motion.div>
             ))}
           </Masonry>
         </div>
 
+        {/* --- FIXED MODAL WITH LINK HANDLER --- */}
         <AnimatePresence>
           {showModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-              <div className="p-8 rounded-[2.5rem] w-full max-w-md bg-[#121212] border border-white/10 text-white">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-2xl font-black italic">Add Memory</h3>
-                  <button onClick={() => setShowModal(false)}><X/></button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4">
+              <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="p-12 rounded-[4rem] w-full max-w-2xl bg-[#0F0F0F] border border-[#A68A56]/20">
+                <div className="flex justify-between items-center mb-10">
+                  <h3 className="text-3xl font-black uppercase italic text-[#A68A56]">New Deposit</h3>
+                  <button onClick={() => setShowModal(false)}><X size={24}/></button>
                 </div>
-                <div className="flex bg-white/5 p-1 rounded-2xl mb-6">
-                  <button onClick={() => setUploadTab("file")} className={`flex-1 py-3 rounded-xl text-[10px] font-black ${uploadTab === 'file' ? 'bg-indigo-600' : ''}`}>FILES</button>
-                  <button onClick={() => setUploadTab("link")} className={`flex-1 py-3 rounded-xl text-[10px] font-black ${uploadTab === 'link' ? 'bg-indigo-600' : ''}`}>LINK</button>
+
+                <div className="flex bg-white/5 p-2 rounded-full mb-10">
+                  <button onClick={() => setUploadTab("file")} className={`flex-1 py-4 rounded-full text-[9px] font-black ${uploadTab === 'file' ? 'bg-[#A68A56] text-black' : 'text-white/40'}`}>FILES</button>
+                  <button onClick={() => setUploadTab("link")} className={`flex-1 py-4 rounded-full text-[9px] font-black ${uploadTab === 'link' ? 'bg-[#A68A56] text-black' : 'text-white/40'}`}>WEB LINK</button>
                 </div>
-                <div className="space-y-4 mb-6 text-black">
-                   <select value={selectedAlbum} onChange={(e) => setSelectedAlbum(e.target.value)} className="w-full p-4 rounded-2xl font-bold text-sm bg-gray-100">
-                     <option value="">Library (All)</option>
-                     {userAlbums.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                   </select>
-                   {uploadTab === "link" && <input type="text" placeholder="Memory Name" value={webLinkName} onChange={(e) => setWebLinkName(e.target.value)} className="w-full p-4 rounded-2xl font-bold text-sm bg-gray-100" />}
-                </div>
-                {uploadTab === "file" ? (
-                  <div className="border-2 border-dashed border-white/10 rounded-[2rem] p-12 text-center relative group">
-                    <input type="file" multiple onChange={handleBulkUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                    <Upload className="mx-auto mb-2 text-indigo-500" size={32} />
-                    <p className="text-sm font-bold text-gray-400">Upload Folder/Photos</p>
+
+                {uploading ? (
+                  <div className="text-center py-10">
+                    <h2 className="text-6xl font-black text-[#A68A56]">{progress}%</h2>
+                    <p className="text-[10px] tracking-widest mt-4">UPLOADING...</p>
                   </div>
                 ) : (
-                  <form onSubmit={handleLinkUpload} className="space-y-4">
-                    <input type="url" placeholder="Paste link..." value={webLink} onChange={(e) => setWebLink(e.target.value)} required className="w-full p-4 rounded-2xl bg-gray-100 text-black text-sm" />
-                    <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs">SAVE</button>
-                  </form>
+                  <div className="space-y-6">
+                    <select value={selectedAlbum} onChange={(e) => setSelectedAlbum(e.target.value)} className="w-full p-5 rounded-3xl bg-white/5 border border-white/10 text-xs font-bold text-[#A68A56]">
+                        <option value="" className="bg-black">Main Vault</option>
+                        {userAlbums.map(a => <option key={a.id} value={a.id} className="bg-black">{a.name}</option>)}
+                    </select>
+
+                    {uploadTab === "file" ? (
+                      <div className="relative border-2 border-dashed border-white/10 rounded-[2rem] p-20 text-center">
+                        <input type="file" multiple onChange={handleBulkUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <Upload className="mx-auto mb-4 text-[#A68A56]" size={32} />
+                        <p className="text-[10px] font-black opacity-40">SELECT LOCAL ASSETS</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleLinkUpload} className="space-y-4">
+                        <input type="text" placeholder="ASSET NAME" value={webLinkName} onChange={(e) => setWebLinkName(e.target.value)} className="w-full p-5 rounded-3xl bg-white/5 border border-white/10 text-white text-xs" />
+                        <input type="url" placeholder="PASTE IMAGE URL" value={webLink} onChange={(e) => setWebLink(e.target.value)} required className="w-full p-5 rounded-3xl bg-white/5 border border-white/10 text-white text-xs" />
+                        <button type="submit" className="w-full py-5 bg-[#A68A56] text-black rounded-full font-black text-[10px]">PRESERVE LINK</button>
+                      </form>
+                    )}
+                  </div>
                 )}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </main>

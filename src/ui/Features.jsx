@@ -1,114 +1,124 @@
 "use client";
-
+import React, { useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { FolderPlus, PenTool, Share2 } from "lucide-react";
+import { ShieldCheck, HardDrive, Share2, Sparkles } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const steps = [
-  {
-    id: "01",
-    title: "Create Your Space",
-    desc: "Start your personal memory vault. Organize photos into albums that feel calm, private, and truly yours.",
-    img: "https://images.unsplash.com/photo-1616077168079-7e09f8f5e36d?auto=format&fit=crop&w=800&q=80",
-    icon: <FolderPlus className="text-indigo-500" size={20} />
+  { 
+    id: "01", 
+    title: "VAULT SECURITY", 
+    desc: "Your memories are encrypted. Military-grade protection for your private legacy.", 
+    img: "https://images.unsplash.com/photo-1557591954-9964a2709d1d?auto=format&fit=crop&w=800&q=80", 
+    icon: <ShieldCheck className="text-black" size={24} />,
+    accent: "bg-[#D1D1D1]" 
   },
-  {
-    id: "02",
-    title: "Organize with Intent",
-    desc: "Rename, reorder, and categorize moments effortlessly. Your memories stay structured as life moves fast.",
-    img: "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=800&q=80",
-    icon: <PenTool className="text-pink-500" size={20} />
+  { 
+    id: "02", 
+    title: "INFINITE ARCHIVE", 
+    desc: "Save every single heartbeat. High-resolution storage that never forgets a pixel.", 
+    img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80", 
+    icon: <HardDrive className="text-black" size={24} />,
+    accent: "bg-[#E9E4D9]"
   },
-  {
-    id: "03",
-    title: "Relive & Share",
-    desc: "Preview, download, or share secure links. Beautiful memories, always accessible, always safe.",
-    img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80",
-    icon: <Share2 className="text-blue-500" size={20} />
+  { 
+    id: "03", 
+    title: "LEGACY SHARING", 
+    desc: "Pass down your story. Generate secure, beautiful links for your loved ones.", 
+    img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80", 
+    icon: <Share2 className="text-black" size={24} />,
+    accent: "bg-[#F9F7F2]"
   },
 ];
 
-export default function HowItWorksDraggable() {
+export default function Features() {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const cards = gsap.utils.toArray(".feature-card");
+    gsap.fromTo(cards, 
+      { y: 150, opacity: 0, scale: 0.9 },
+      { 
+        y: 0, opacity: 1, scale: 1,
+        stagger: 0.2, 
+        duration: 1.2, 
+        ease: "expo.out",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 75%",
+        }
+      }
+    );
+  }, []);
+
   return (
-    <section className="relative w-full py-32 bg-[#fafafa] overflow-hidden">
+    <section ref={containerRef} className="relative w-full py-40 bg-[#E9E4D9] overflow-hidden border-b border-black">
       
-      {/* Background Subtle Grid Pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-        style={{ backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, backgroundSize: '40px 40px' }} 
-      />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="space-y-4 mb-20"
-        >
-          <span className="text-[10px] font-black tracking-[0.3em] text-indigo-600 uppercase bg-indigo-50 px-4 py-2 rounded-full">
-            The Process
-          </span>
-          <h2 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tighter">
-            Three steps to <span className="italic font-serif text-gray-400 text-6xl">forever.</span>
-          </h2>
-          <p className="text-gray-500 max-w-xl mx-auto font-medium">
-            We've simplified the complex world of photo management into a tactile, 
-            beautiful experience.
-          </p>
-        </motion.div>
-
-        <div className="relative flex flex-col lg:flex-row justify-center items-center gap-10">
-          {steps.map((step, index) => {
-            const x = useMotionValue(0);
-            const y = useMotionValue(0);
-
-            const rotateX = useTransform(y, [-100, 100], [15, -15]);
-            const rotateY = useTransform(x, [-100, 100], [-15, 15]);
-
-            return (
-              <motion.div
-                key={step.id}
-                drag
-                dragElastic={0.1}
-                dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  x.set(e.clientX - rect.left - rect.width / 2);
-                  y.set(e.clientY - rect.top - rect.height / 2);
-                }}
-                onMouseLeave={() => {
-                  x.set(0);
-                  y.set(0);
-                }}
-                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-                whileHover={{ scale: 1.02 }}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20, delay: index * 0.1 }}
-                className="group relative w-[320px] h-[480px] rounded-[2.5rem] bg-white border border-black/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.05)] cursor-grab active:cursor-grabbing p-4"
-              >
-                {/* Image Section */}
-                <div className="h-[240px] rounded-[2rem] overflow-hidden relative mb-6" style={{ transform: "translateZ(30px)" }}>
-                  <img src={step.img} alt={step.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-sm">
-                    {step.icon}
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="px-4 text-left space-y-3" style={{ transform: "translateZ(50px)" }}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-black text-black/5 tracking-tighter">{step.id}</span>
-                    <h3 className="text-xl font-bold text-gray-900 tracking-tight">{step.title}</h3>
-                  </div>
-                  <p className="text-sm text-gray-500 leading-relaxed font-medium">
-                    {step.desc}
-                  </p>
-                </div>
-
-                {/* Bottom Shadow Glow */}
-                <div className="absolute -bottom-4 inset-x-10 h-10 bg-indigo-500/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.div>
-            );
-          })}
+      {/* Header Section */}
+      <div className="max-w-7xl mx-auto px-6 mb-32 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 border border-black rounded-full mb-8">
+            <Sparkles size={12} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Core Capabilities</span>
         </div>
+        <h2 className="text-[10vw] font-black uppercase leading-[0.8] tracking-tighter text-[#1A1A1A]">
+          DESIGNED TO <br /> <span className="font-serif italic text-black/30">LAST.</span>
+        </h2>
+      </div>
+
+      {/* Draggable Cards Grid */}
+      <div className="flex flex-col lg:flex-row justify-center items-center gap-12 px-6">
+        {steps.map((step) => {
+          const x = useMotionValue(0);
+          const y = useMotionValue(0);
+          const rotateX = useTransform(y, [-100, 100], [15, -15]);
+          const rotateY = useTransform(x, [-100, 100], [-15, 15]);
+
+          return (
+            <motion.div
+              key={step.id}
+              drag
+              dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                x.set(e.clientX - rect.left - rect.width / 2);
+                y.set(e.clientY - rect.top - rect.height / 2);
+              }}
+              onMouseLeave={() => { x.set(0); y.set(0); }}
+              style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+              className="feature-card group relative w-full max-w-[380px] h-[550px] bg-white border border-black rounded-[3rem] p-4 cursor-grab active:cursor-grabbing shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all duration-300"
+            >
+              {/* Image Container */}
+              <div className="h-[300px] w-full rounded-[2.5rem] overflow-hidden relative border border-black/10">
+                 <img 
+                    src={step.img} 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" 
+                    alt={step.title}
+                 />
+                 <div className="absolute top-6 right-6 bg-white border border-black p-4 rounded-full shadow-lg">
+                    {step.icon}
+                 </div>
+              </div>
+
+              {/* Text Content */}
+              <div className="mt-10 px-6 space-y-4" style={{ transform: "translateZ(50px)" }}>
+                <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-black/40 tracking-[0.3em]">{step.id}</span>
+                    <div className="h-[1px] flex-grow mx-4 bg-black/10" />
+                </div>
+                <h3 className="text-3xl font-black uppercase tracking-tighter">{step.title}</h3>
+                <p className="text-sm font-medium leading-relaxed text-black/60">{step.desc}</p>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Decorative Bottom Text */}
+      <div className="mt-32 text-center">
+        <p className="text-[10px] font-black uppercase tracking-[0.6em] opacity-20">Secure • Eternal • Shared</p>
       </div>
     </section>
   );
