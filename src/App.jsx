@@ -7,7 +7,8 @@ import Albums from "./Pages/Album";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AlbumDetails from "./Pages/AlbumDetails";
-
+import Register from "./Pages/Register";
+import ForgotPassword from "./Pages/ResetPassword.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -17,6 +18,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login/>} />
+
+        <Route path="/register" element={<Register/>} />
+        <Route path="/forgot-password" element={<ForgotPassword/>} />
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/albums" element={<Albums />} />
