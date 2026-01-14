@@ -10,6 +10,11 @@ import Loader from "./components/Loader"; // Tera GSAP wala amiro wala loader
 import { useSmoothScroll } from "./hooks/UseSmoothScroll";
 
 // Pages
+
+
+
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 import Landing from "./Pages/Landing";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboard";
@@ -54,6 +59,7 @@ function AnimatedRoutes() {
 
   return (
     <>
+    <Navbar />
       <CustomCursor />
       
       <AnimatePresence mode="wait">
@@ -87,6 +93,7 @@ function AnimatedRoutes() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Footer />
     </>
   );
 }

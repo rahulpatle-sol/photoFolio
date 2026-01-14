@@ -128,6 +128,7 @@ const Dashboard = () => {
 
         <div className="mt-auto pt-8 border-t border-white/5">
           <button onClick={() => signOut(auth)} className="w-full p-4 bg-white/5 text-red-500 rounded-full font-black text-[9px] tracking-widest">TERMINATE SESSION</button>
+          <motion.a href="/" className="w-full p-4 text-xl bg-white/5 m text-[#A68A56] rounded-full   tracking-widest">Go  TO  Home</motion.a>
         </div>
       </aside>
 

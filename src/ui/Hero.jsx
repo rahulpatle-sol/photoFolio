@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
-
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer";
 export default function Hero() {
   return (
     <section className="relative min-h-screen pt-10 px-6 lg:px-12 flex flex-col justify-between">
+      <Navbar/>
       {/* Top Bar / Marquee style header */}
-      <div className="flex justify-between border-b border-black pb-4 text-[10px] font-black uppercase tracking-widest">
-        <span>Rent Our Latest Arrival 13/01/2026</span>
-        <span className="hidden md:block">Photofolio: Preserve Your Legacy</span>
-      </div>
+    
 
       {/* Main Content Area */}
       <div className="relative flex flex-col items-center justify-center flex-grow py-20">
@@ -39,6 +38,7 @@ export default function Hero() {
           Rent Now Your New Outfit
         </button>
       </div>
+      <Footer/>
     </section>
   );
 }

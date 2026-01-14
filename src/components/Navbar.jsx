@@ -36,7 +36,8 @@ export default function Navbar() {
             </div>
             {/* Brand Name */}
             <div className="flex flex-col">
-                <span className="text-sm font-black uppercase tracking-[0.3em] leading-none text-[#1A1A1A]">PHOTOFOLIO</span>
+                <a href="/" className="text-sm font-black uppercase tracking-[0.3em] leading-none text-[#1A1A1A]">PHOTOFOLIO</a>
+
                 <span className="text-[8px] font-bold uppercase tracking-[0.5em] text-[#A68A56] mt-1">Archive System</span>
             </div>
           </motion.div>
@@ -57,12 +58,13 @@ export default function Navbar() {
 
           {/* --- ACTION AREA --- */}
           <div className="flex items-center gap-4">
-            <motion.button 
+            <motion.a 
+            href='/login'
               whileHover={{ scale: 1.02 }}
               className="hidden sm:flex items-center gap-3 px-8 py-3.5 bg-[#1A1A1A] text-[#A68A56] rounded-full text-[9px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-black transition-all"
             >
               Access Vault <ArrowUpRight size={14} />
-            </motion.button>
+            </motion.a>
             
             {/* Menu Toggle Button */}
             <button 
@@ -107,7 +109,7 @@ export default function Navbar() {
             {/* Right Side: Links */}
             <div className="flex-1 flex flex-col justify-center px-10 md:px-24 bg-[#F9F7F2]">
               <div className="space-y-4">
-                {['Pricing', 'Contact', 'About'].map((item, i) => (
+                {['Pricing', 'Contact', 'About','login'].map((item, i) => (
                   <motion.div
                     key={item}
                     initial={{ opacity: 0, x: 50 }}
@@ -116,7 +118,7 @@ export default function Navbar() {
                   >
                     <a
                       href={`/${item.toLowerCase().replace(' ', '-')}`}
-                      className="group flex items-end gap-6 text-3xl md:text-[8vw] font-lite uppercase tracking-tighter text-[#1A1A1A] hover:italic hover:text-[#A68A56] transition-all leading-none"
+                      className="group flex items-end gap-6 text-3xl md:text-[8vw]  tracking-tighter text-[#1A1A1A] hover:italic hover:text-[#A68A56] transition-all leading-none"
                       onClick={() => setIsOpen(false)}
                     >
                       <span className="text-xs font-serif italic text-gray-300 group-hover:text-[#A68A56] pb-2">0{i+1}</span>
