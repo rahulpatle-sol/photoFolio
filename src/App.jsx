@@ -59,7 +59,7 @@ function AnimatedRoutes() {
 
   return (
     <>
-    <Navbar />
+{!Dashboard && <Navbar />}
       <CustomCursor />
       
       <AnimatePresence mode="wait">
@@ -93,7 +93,7 @@ function AnimatedRoutes() {
           </motion.div>
         )}
       </AnimatePresence>
-      <Footer />
+     {!Dashboard && <Footer />}
     </>
   );
 }
